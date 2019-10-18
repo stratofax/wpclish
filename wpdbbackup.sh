@@ -6,16 +6,18 @@
 # get the location of the script file a
 CURRENTDIR=$(pwd)
 SCRIPTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 # go to the script directory, should be contained in the web root
 cd $SCRIPTPATH
 cd ..
-# local configuration
+
+# important directories
 WEBROOT=$(pwd)
 BACKUPDIR='sqlbackup'
 SCRIPTDIR='wpclish'
 BACKUPPATH="$WEBROOT/$BACKUPDIR/"
 # this list includes default directories in a VVV installation
-IGNORETHESE=( $BACKUPDIR $SCRIPTDIR default  phpcs wordpress-one  wordpress-two )
+IGNORETHESE=( $BACKUPDIR $SCRIPTDIR default phpcs wordpress-one wordpress-two )
 
 wpclibackup () {
   # give our function paramaeters useful names
@@ -60,53 +62,53 @@ if [ ! -d "$BACKUPPATH" ]; then
   exit 1
 fi
 
-# for each file in the in the WEBROOT directory
+# find all the subdirectories in the WEBROOT directory
 for fname in * ; do
   # is it a directory?
   if [ -d "$fname" ]; then
     # assume we don't want to skip the directory
     skipdir=0
     printf "Found directory $fname ... "
+
     # for each of the directories to ignore
     for ignoredir in ${IGNORETHESE[@]} ; do
       if [ $ignoredir = $fname ] ; then
         echo "skipped."   
         skipdir=1
         let "skippedtotal+=1" 
+        # if we got a match, we're done!
         break
       fi
     done
+    
     if [ $skipdir -eq 0 ] ; then
       cd $fname
       currentwpdir=$(pwd)
-      # valiationfile="/wp-config.php"
-      # testfile=$currentwpdir$valiationfile
-      # # Is this a WordPress directory? Check for wp-config.php file
-      # echo "Searching for $testfile"
-      # if [ -f `$testfile` ] ; then
-      #   echo "WordPress $valiationfile found!"
-      # else
-      #   echo "but no $valiationfile found!"
-      #   echo "Directory won't be processed."
-      #   skipdir=2
-      #   let "skippedtotal+=1" 
-      #   break
-      # fi
       echo "Now processing WordPress site in $currentwpdir"
-      echo "Calculating WordPress database size ..."
-      wp db size
-      # back up the database before beginning maintenance
-      wpclibackup "$fname" "$BACKUPPATH"
-      # optimize and back up again
-      wp db optimize
-      wp db size
-      wpclibackup "$fname" "$BACKUPPATH"
-      # track total number of sites processed
-      let "processedtotal+=1"
-      #back to webroot
+
+      # if this db check doesn't work, we have a problem!
+      wp db check
+      if [ $? -eq 0 ] ; then
+        echo "Calculating WordPress database size ..."
+        wp db size
+        # back up the database before beginning maintenance
+        wpclibackup $fname $BACKUPPATH
+        # optimize and back up again
+        wp db optimize
+        wp db size
+        wpclibackup $fname $BACKUPPATH
+        # track total number of sites processed
+        let "processedtotal+=1"
+      else
+        echo "Not a valid WordPress installation ... skipped."
+        skipdir=2
+        let "skippedtotal+=1" 
+      fi
+      # back to webroot
       cd $WEBROOT
     fi
   fi
 done
+
 echo "Processed $processedtotal and skipped $skippedtotal directories."
 cd $CURRENTDIR
