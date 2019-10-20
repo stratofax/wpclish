@@ -94,7 +94,7 @@ else
     cd $CurrentDir
     echo "ERROR: the specified WordPress directory,"
     echo "       $wppath"
-    echo "      is not a valid WP-CLI installation."
+    echo "       is not a valid WP-CLI installation."
     showusage
     exit $InvalidWP
 fi
