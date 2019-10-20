@@ -1,5 +1,5 @@
 #!/bin/bash
-# wpdbbackup.sh
+# wpmultibackup.sh
 # backup the databases for all of the WP sites in the web server directory
 # by Neil Johnson, neil@cadent.com
 
