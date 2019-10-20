@@ -4,13 +4,13 @@
 # by Neil Johnson, neil@cadent.com
 
 # error codes
-WPDIRMISSING=1
-NOWPDIR=2
-STORAGEDIRMISSING=3
-NOSTORAGEDIR=4
-INVALIDWP=5
-NOWPCLI=6
-CURRENTDIR=$(pwd)
+WPDirMissing=1
+NoWPDir=2
+StorageDirMissing=3
+NoStorageDir=4
+InvalidWP=5
+NoWPCLI=6
+CurrentDir=$(pwd)
 
 showusage() {
     echo "usage: $0 wpdir backupdir"
@@ -27,7 +27,7 @@ backuppath=$(echo $2 | sed 's:/*$::')
 if [ ! $wppath ]; then
     echo "ERROR: path to WordPress installation missing."
     showusage
-    exit $WPDIRMISSING
+    exit $WPDirMissing
 fi
 
 if [ ! -d  $wppath ]; then
@@ -35,13 +35,13 @@ if [ ! -d  $wppath ]; then
     echo "       $wppath"
     echo "       does not exist."
     showusage
-    exit $NOWPDIR
+    exit $NoWPDir
 fi
 
 if [ ! $backuppath ]; then
     echo "ERROR: path to backup directory missing."
     showusage
-    exit $STORAGEDIRMISSING
+    exit $StorageDirMissing
 fi
 
 if [ ! -d  $backuppath ]; then
@@ -49,7 +49,7 @@ if [ ! -d  $backuppath ]; then
     echo "       $backuppath"
     echo "       does not exist."
     showusage
-    exit $NOSTORAGEDIR
+    exit $NoStorageDir
 fi
 
 wpbase=$(basename $wppath)
@@ -65,10 +65,10 @@ tarfile=$backupfile.tar.gz
 cd $wppath
 wp cli version
 if [ $? -gt 0 ] ; then
-    cd $CURRENTDIR
+    cd $CurrentDir
     echo "ERROR: WP-CLI is not installed correctly."
     showusage
-    exit $ NOWPCLI
+    exit $ NoWPCLI
 fi
 
 # create the backup file and capture the size
@@ -89,12 +89,12 @@ if [ $? -eq 0 ] ; then
     # # how much space did we save?
     # local savings=$(( $backupsize - $tarsize ))
     # echo "Saved $savings bytes."
-    cd $CURRENTDIR
+    cd $CurrentDir
 else
-    cd $CURRENTDIR
+    cd $CurrentDir
     echo "ERROR: the specified WordPress directory,"
     echo "       $wppath"
     echo "      is not a valid WP-CLI installation."
     showusage
-    exit $INVALIDWP
+    exit $InvalidWP
 fi

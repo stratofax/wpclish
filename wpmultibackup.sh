@@ -4,20 +4,20 @@
 # by Neil Johnson, neil@cadent.com
 
 # get the location of the script file a
-CURRENTDIR=$(pwd)
-SCRIPTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+CurrentDir=$(pwd)
+ScriptPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # go to the script directory, should be contained in the web root
-cd $SCRIPTPATH
+cd $ScriptPath
 cd ..
 
 # important directories
-WEBROOT=$(pwd)
-BACKUPDIR='sqlbackup'
-SCRIPTDIR='wpclish'
-BACKUPPATH="$WEBROOT/$BACKUPDIR/"
+WebRoot=$(pwd)
+BackupDir='sqlbackup'
+ScriptDir='wpclish'
+BackupPath="$WebRoot/$BackupDir/"
 # this list includes default directories in a VVV installation
-IGNORETHESE=( $BACKUPDIR $SCRIPTDIR default phpcs wordpress-one wordpress-two )
+IgnoreThese=( $BackupDir $ScriptDir default phpcs wordpress-one wordpress-two )
 
 wpclibackup () {
   # give our function paramaeters useful names
@@ -44,25 +44,25 @@ wpclibackup () {
   echo "Saved $savings bytes."
 }
 
-cd $WEBROOT
+cd $WebRoot
 # set up counters
 processedtotal=0
 skippedtotal=0
 
 # check for backup directory
-if [ ! -d "$BACKUPPATH" ]; then
-  echo "Creating backup directory: $BACKUPDIR"
-  mkdir $BACKUPDIR
+if [ ! -d "$BackupPath" ]; then
+  echo "Creating backup directory: $BackupDir"
+  mkdir $BackupDir
 fi
 
 # if the backup directory doesn't exist, there's a problem!
-if [ ! -d "$BACKUPPATH" ]; then
-  echo "ERROR: unable to create backup directory: $BACKUPDIR"
+if [ ! -d "$BackupPath" ]; then
+  echo "ERROR: unable to create backup directory: $BackupDir"
   echo "Script $basename terminated."
   exit 1
 fi
 
-# find all the subdirectories in the WEBROOT directory
+# find all the subdirectories in the WebRoot directory
 for fname in * ; do
   # is it a directory?
   if [ -d "$fname" ]; then
@@ -71,7 +71,7 @@ for fname in * ; do
     printf "Found directory $fname ... "
 
     # for each of the directories to ignore
-    for ignoredir in ${IGNORETHESE[@]} ; do
+    for ignoredir in ${IgnoreThese[@]} ; do
       if [ $ignoredir = $fname ] ; then
         echo "skipped."   
         skipdir=1
@@ -92,11 +92,11 @@ for fname in * ; do
         echo "Calculating WordPress database size ..."
         wp db size
         # back up the database before beginning maintenance
-        wpclibackup $fname $BACKUPPATH
+        wpclibackup $fname $BackupPath
         # optimize and back up again
         wp db optimize
         wp db size
-        wpclibackup $fname $BACKUPPATH
+        wpclibackup $fname $BackupPath
         # track total number of sites processed
         let "processedtotal+=1"
       else
@@ -104,11 +104,11 @@ for fname in * ; do
         skipdir=2
         let "skippedtotal+=1" 
       fi
-      # back to webroot
-      cd $WEBROOT
+      # back to WebRoot
+      cd $WebRoot
     fi
   fi
 done
 
 echo "Processed $processedtotal and skipped $skippedtotal directories."
-cd $CURRENTDIR
+cd $CurrentDir
