@@ -4,13 +4,13 @@
 # by Neil Johnson, neil@cadent.com
 
 # error codes
-WPDirMissing=1
-NoWPDir=2
-StorageDirMissing=3
-NoStorageDir=4
-InvalidWP=5
-NoWPCLI=6
-CurrentDir=$(pwd)
+E_WPDIRMISSING=1
+E_WPDIRNOTFOUND=2
+E_STORAGEDIRMISSING=3
+E_NOSTORAGEDIR=4
+E_INVALIDWP=5
+E_BADWPCLI=6
+current_dir=$(pwd)
 
 showusage() {
     echo "usage: $0 wpdir backupdir"
@@ -27,7 +27,7 @@ backuppath=$(echo $2 | sed 's:/*$::')
 if [ ! $wppath ]; then
     echo "ERROR: path to WordPress installation missing."
     showusage
-    exit $WPDirMissing
+    exit $E_WPDIRMISSING
 fi
 
 if [ ! -d  $wppath ]; then
@@ -35,13 +35,13 @@ if [ ! -d  $wppath ]; then
     echo "       $wppath"
     echo "       does not exist."
     showusage
-    exit $NoWPDir
+    exit $E_WPDIRNOTFOUND
 fi
 
 if [ ! $backuppath ]; then
     echo "ERROR: path to backup directory missing."
     showusage
-    exit $StorageDirMissing
+    exit $E_STORAGEDIRMISSING
 fi
 
 if [ ! -d  $backuppath ]; then
@@ -49,7 +49,7 @@ if [ ! -d  $backuppath ]; then
     echo "       $backuppath"
     echo "       does not exist."
     showusage
-    exit $NoStorageDir
+    exit $E_NOSTORAGEDIR
 fi
 
 wpbase=$(basename $wppath)
@@ -65,10 +65,10 @@ tarfile=$backupfile.tar.gz
 cd $wppath
 wp cli version
 if [ $? -gt 0 ] ; then
-    cd $CurrentDir
+    cd $current_dir
     echo "ERROR: WP-CLI is not installed correctly."
     showusage
-    exit $ NoWPCLI
+    exit $ E_BADWPCLI
 fi
 
 # create the backup file and capture the size
@@ -76,25 +76,24 @@ fi
 echo "Creating backup file: $backupfile ..."
 wp db export $backupfile
 if [ $? -eq 0 ] ; then
-    echo "execute!"
-    # local backupsize=$(wc -c $backupfile | awk '{print $1}')
-    # echo "Backed up $backupsize bytes to $backupfile."
-    # # compress the backup, remove the original, caputure size
-    # echo "Compressing $backupfile ..."
-    # tar -czvf $tarfile $backupfile
-    # rm $backupfile
-    # local tarsize=$(wc -c $tarfile | awk '{print $1}')
-    # echo "Compressed $backupsize bytes to $tarsize in file:"
-    # echo $tarfile
-    # # how much space did we save?
-    # local savings=$(( $backupsize - $tarsize ))
-    # echo "Saved $savings bytes."
-    cd $CurrentDir
+    backupsize=$(wc -c $backupfile | awk '{print $1}')
+    echo "Backed up $backupsize bytes to $backupfile."
+    # compress the backup, remove the original, caputure size
+    echo "Compressing $backupfile ..."
+    tar -czvf $tarfile $backupfile
+    rm $backupfile
+    tarsize=$(wc -c $tarfile | awk '{print $1}')
+    echo "Compressed $backupsize bytes to $tarsize in file:"
+    echo $tarfile
+    # how much space did we save?
+    savings=$(( $backupsize - $tarsize ))
+    echo "Saved $savings bytes."
+    cd $current_dir
 else
-    cd $CurrentDir
+    cd $current_dir
     echo "ERROR: the specified WordPress directory,"
     echo "       $wppath"
     echo "       is not a valid WP-CLI installation."
     showusage
-    exit $InvalidWP
+    exit $E_INVALIDWP
 fi
