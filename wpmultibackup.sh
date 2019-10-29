@@ -19,30 +19,30 @@ BackupPath="$WebRoot/$BackupDir/"
 # this list includes default directories in a VVV installation
 IgnoreThese=( $BackupDir $ScriptDir default phpcs wordpress-one wordpress-two )
 
-wpclibackup () {
-  # give our function paramaeters useful names
-  local targetdir=$1
-  local storagedir=$2
-  # create file names
-  local timestamp=$(date +%Y-%m-%d_%H-%M-%S)
-  local backupfile="$storagedir$targetdir-$timestamp.sql"
-  local tarfile=$backupfile.tar.gz
-  # create the backup file and capture the size
-  echo "Creating backup file: $backupfile ..."
-  wp db export $backupfile
-  local backupsize=$(wc -c $backupfile | awk '{print $1}')
-  echo "Backed up $backupsize bytes to $backupfile."
-  # compress the backup, remove the original, caputure size
-  echo "Compressing $backupfile ..."
-  tar -czvf $tarfile $backupfile
-  rm $backupfile
-  local tarsize=$(wc -c $tarfile | awk '{print $1}')
-  echo "Compressed $backupsize bytes to $tarsize in file:"
-  echo $tarfile
-  # how much space did we save?
-  local savings=$(( $backupsize - $tarsize ))
-  echo "Saved $savings bytes."
-}
+# wpclibackup () {
+#   # give our function paramaeters useful names
+#   local targetdir=$1
+#   local storagedir=$2
+#   # create file names
+#   local timestamp=$(date +%Y-%m-%d_%H-%M-%S)
+#   local backupfile="$storagedir$targetdir-$timestamp.sql"
+#   local tarfile=$backupfile.tar.gz
+#   # create the backup file and capture the size
+#   echo "Creating backup file: $backupfile ..."
+#   wp db export $backupfile
+#   local backupsize=$(wc -c $backupfile | awk '{print $1}')
+#   echo "Backed up $backupsize bytes to $backupfile."
+#   # compress the backup, remove the original, caputure size
+#   echo "Compressing $backupfile ..."
+#   tar -czvf $tarfile $backupfile
+#   rm $backupfile
+#   local tarsize=$(wc -c $tarfile | awk '{print $1}')
+#   echo "Compressed $backupsize bytes to $tarsize in file:"
+#   echo $tarfile
+#   # how much space did we save?
+#   local savings=$(( $backupsize - $tarsize ))
+#   echo "Saved $savings bytes."
+# }
 
 cd $WebRoot
 # set up counters
@@ -86,13 +86,13 @@ for fname in * ; do
       currentwpdir=$(pwd)
       echo "Now processing WordPress site in $currentwpdir"
 
-      # if this db check doesn't work, we have a problem!
-      wp db check
+      # 
+      $ScriptPath/wpclibackup.sh $fname $BackupPath
       if [ $? -eq 0 ] ; then
         echo "Calculating WordPress database size ..."
         wp db size
         # back up the database before beginning maintenance
-        wpclibackup $fname $BackupPath
+        if [ $(wpclibackup $fname $BackupPath)]
         # optimize and back up again
         wp db optimize
         wp db size

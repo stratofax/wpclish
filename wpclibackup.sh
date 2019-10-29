@@ -8,7 +8,7 @@ E_WPDIRMISSING=1
 E_WPDIRNOTFOUND=2
 E_STORAGEDIRMISSING=3
 E_NOSTORAGEDIR=4
-E_INVALIDWP=5
+E_BACKUPFAIL=5
 E_BADWPCLI=6
 current_dir=$(pwd)
 
@@ -62,7 +62,10 @@ echo "Backup path: $backuppath"
 timestamp=$(date +%Y-%m-%d_%H-%M-%S)
 backupfile="$backuppath/$wpbase-$timestamp.sql"
 tarfile=$backupfile.tar.gz
+
+# change to the working directory
 cd $wppath
+# test for a working installation of WP-CLI
 wp cli version
 if [ $? -gt 0 ] ; then
     cd $current_dir
@@ -72,7 +75,6 @@ if [ $? -gt 0 ] ; then
 fi
 
 # create the backup file and capture the size
-
 echo "Creating backup file: $backupfile ..."
 wp db export $backupfile
 if [ $? -eq 0 ] ; then
@@ -91,9 +93,9 @@ if [ $? -eq 0 ] ; then
     cd $current_dir
 else
     cd $current_dir
-    echo "ERROR: the specified WordPress directory,"
+    echo "ERROR: the WordPress database export from"
     echo "       $wppath"
-    echo "       is not a valid WP-CLI installation."
+    echo "       failed."
     showusage
-    exit $E_INVALIDWP
+    exit $E_BACKUPFAIL
 fi
