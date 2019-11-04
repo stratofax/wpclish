@@ -75,7 +75,7 @@ for fname in * ; do
       if [ $ignoredir = $fname ] ; then
         echo "skipped."   
         skipdir=1
-        let "skippedtotal+=1" 
+        ((skippedtotal++))
         # if we got a match, we're done!
         break
       fi
@@ -85,24 +85,22 @@ for fname in * ; do
       cd $fname
       currentwpdir=$(pwd)
       echo "Now processing WordPress site in $currentwpdir"
-
-      # 
-      $ScriptPath/wpclibackup.sh $fname $BackupPath
+      # let's check the size of the db to see if we can use WP-CLI
+      wp db size
       if [ $? -eq 0 ] ; then
         echo "Calculating WordPress database size ..."
-        wp db size
         # back up the database before beginning maintenance
-        if [ $(wpclibackup $fname $BackupPath)]
+        $ScriptPath/wpclibackup.sh $fname $BackupPath
         # optimize and back up again
         wp db optimize
         wp db size
-        wpclibackup $fname $BackupPath
+        $ScriptPath/wpclibackup.sh $fname $BackupPath
         # track total number of sites processed
-        let "processedtotal+=1"
+        ((processedtotal++))
       else
         echo "Not a valid WordPress installation ... skipped."
         skipdir=2
-        let "skippedtotal+=1" 
+        ((skippedtotal++))
       fi
       # back to WebRoot
       cd $WebRoot
