@@ -7,5 +7,13 @@ length=${#currentcolors[@]}
 
 for (( i=0; i < length; i++ ))
 do
-    wp search-replace "${currentcolors[$i]}" "${newcolors[$i]}"
+    uppercolor=$( echo "${currentcolors[$i]}" | tr '[:lower:]' '[:upper:]' )
+    echo "Replacing ${uppercolor} with ${newcolors[$i]}..."
+    # wp search-replace "${uppercolor}" "${newcolors[$i]}"
+    
+    lowercolor=$( echo "${currentcolors[$i]}" | tr '[:upper:]' '[:lower:]' )
+    echo "Replacing ${lowercolor} with ${newcolors[$i]}..."
+    # wp search-replace "${uppercolor}" "${newcolors[$i]}"
 done
+
+echo "Replacements complete."
