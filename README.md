@@ -1,5 +1,10 @@
 # wpclish
-WP-CLI bash scripts to maintain WordPress installations. These scripts work on servers where your WordPress websites are all stored in the same "webroot" directory. If these scripts are installed correctly, they will calculate any required pathnames correctly.
+
+WP-CLI bash scripts to maintain WordPress installations.
+
+## About
+
+These scripts work best on servers where your WordPress websites are all stored in the same "webroot" directory. If these scripts are installed correctly, they will calculate any required pathnames correctly.
 
 A typical webroot directory looks like this:
 
@@ -15,7 +20,7 @@ These scripts work with WordPress installations
 * A web server with bash configured correctly
 * A user account to run these scripts with read and write access to the webroot directory (ideally *not* "root")
 
-## Installation 
+## Installation
 
 1. Unzip or clone (using git) the `wpclish` directory (this repository) into your webroot directory. **Do not** place the directory inside a website subdirectory, as this poses a major security risk!
 2. Run the scripts at the command line via SSH to test them on your system.
@@ -36,3 +41,7 @@ The script will:
 3. For the remaining directories, attempt to check the WordPress database.
 4. If the check is successful, the script will backup and compress the WordPress database to the `sqlbackup` directory.
 5. Then, the script will optimize the WordPress database and back up the optimized version.
+
+### palette_shift.sh
+
+This script convert all colors in the database from one palette to another using search and replace. You can use this with any number of hex values; the example script uses five. Both lists, `currentcolors` and `newcolors` must contain the same number of colors and the color value substitutions are made based on the position of the color in the list.
